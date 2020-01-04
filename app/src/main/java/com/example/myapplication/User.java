@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 public class User {
+    public User(){}
 
     private final static String QUEUE_NAME = "messenger";
 
