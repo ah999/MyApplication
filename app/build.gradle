@@ -30,4 +30,7 @@ dependencies {
     implementation files('libs/amqp-client-5.8.0-javadoc.jar')
     implementation files('libs/slf4j-api-1.7.21.jar')
     implementation files('libs/slf4j-simple-1.7.22.jar')
+    implementation files('libs/amqp-client-4.9.1.jar')
+    implementation files('libs/amqp-client-4.9.1-javadoc.jar')
+    implementation files('libs/amqp-client-4.9.1-sources.jar')
 }
