@@ -1,34 +1,48 @@
 package com.example.myapplication;
+
 import com.rabbitmq.client.*;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class User {
-    public User(){}
 
+public class User extends Thread{
+    private String i;
+
+    public User(){}
     private final static String QUEUE_NAME = "messenger";
 
-    public void publish() throws java.io.IOException, TimeoutException {
 
+    // run your networking code here
+    public void publish(String i) {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel();
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-        String message = "Well, that's no ordinary rabbit.";
-        channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
-        System.out.println(" [x] Sent '" + message + "'");
-        channel.close();
-        connection.close();
 
+        factory.setUsername("ahmed");
+        factory.setPassword("123");
+        factory.setHost("192.168.2.104");
+        factory.setPort(5672);
+        factory.setVirtualHost("/");
+        try {
+            Connection connection = factory.newConnection();
+            Channel channel = connection.createChannel();
+            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            if(i==null){System.out.println("null");}else {
+            channel.basicPublish("", QUEUE_NAME, null, i.getBytes());
+            System.out.println(" [x] Sent '" + i + "'");
+            channel.close();
+            connection.close();}
+        }catch (TimeoutException |java.io.IOException e){
+
+        }
     }
 
-
-    public void subscribe() throws java.io.IOException, java.lang.InterruptedException, TimeoutException {
-
+    public void subscribe()  {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
-        Connection connection = factory.newConnection();
+
+        factory.setUsername("ahmed");
+        factory.setPassword("123");
+        factory.setHost("192.168.2.104");
+        factory.setPort(15672);
+        try{Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
@@ -42,7 +56,9 @@ public class User {
         };
         channel.basicConsume(QUEUE_NAME, true, consumer);
 
-    }
+    }catch (java.io.IOException| TimeoutException e){
 
+        }
+    }
 
 }
