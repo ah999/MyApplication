@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
                     edttext = (EditText) findViewById(R.id.editText);
                     etext = (String) edttext.getText().toString();
 
-                    new Publisher().execute(etext);
+                    new Publisher().execute(etext,"1","p1");
 
 
                     Context context = getApplicationContext();
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                     final CharSequence text = "subscribe Humidity !!";
                     txt = (TextView) findViewById(R.id.textViewResult);
 
-                    new Subscriber().execute();
+                    new Subscriber().execute("1","p1");
                     //new Subscriber().onPostExecute(etext);
                     String m;
                     m = message;
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     edttext = (EditText) findViewById(R.id.editText);
                     etext = (String) edttext.getText().toString();
 
-                    new Publisher().execute(etext);
+                    new Publisher().execute(etext,"2","p2");
 
 
                     Context context = getApplicationContext();
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                     final CharSequence text = "subscribe Temprature !!";
                     txt = (TextView) findViewById(R.id.textViewResult);
 
-                    new Subscriber().execute();
+                    new Subscriber().execute("2","p2");
                     //new Subscriber().onPostExecute(etext);
                     String m;
                     m = message;
@@ -150,6 +150,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... strings) {
+             final String routinKey = strings[1];
+            String QUEUE_NAME = strings[2];
+
             try {
                 factory.setHost("192.168.2.104");
                 factory.setPort(5672);
@@ -159,13 +162,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Connection connection = factory.newConnection();
                 Channel channel = connection.createChannel();
-                channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+                channel.exchangeDeclare(EXCHANGE_NAME, "direct",true);
                 String queueName = channel.queueDeclare().getQueue();
-                channel.queueBind(queueName, EXCHANGE_NAME, "");
+                channel.queueBind(queueName, EXCHANGE_NAME, routinKey);
 
 
-                //channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-                channel.basicPublish(EXCHANGE_NAME, "", null, strings[0].getBytes("UTF-8"));
+                channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+                channel.basicPublish(EXCHANGE_NAME, routinKey,null , strings[0].getBytes("UTF-8"));
                 channel.close();
                 connection.close();
             } catch (TimeoutException | java.io.IOException e) {
@@ -181,11 +184,14 @@ public class MainActivity extends AppCompatActivity {
     }
     public class Subscriber extends AsyncTask< String, Void, String> {
         private Exception exception;
+        //private final static String QUEUE_NAME = "messenger";
         private static final String EXCHANGE_NAME = "logs";
 
 
         @Override
         protected String doInBackground(String... strings) {
+            final String routinKey = strings[0];
+            String QUEUE_NAME = strings[1];
             try{
                 factory.setUsername("ahmed");
                 factory.setPassword("123");
@@ -193,9 +199,9 @@ public class MainActivity extends AppCompatActivity {
                 factory.setPort(5672);
                 Connection connection = factory.newConnection();
                 Channel channel = connection.createChannel();
-                channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+                channel.exchangeDeclare(EXCHANGE_NAME, "direct",true);
                 String queueName = channel.queueDeclare().getQueue();
-                channel.queueBind(queueName, EXCHANGE_NAME, "");
+                channel.queueBind(queueName, EXCHANGE_NAME, routinKey);
 
                 channel.queueDeclare(QUEUE_NAME, false, false, false, null);
                 System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
