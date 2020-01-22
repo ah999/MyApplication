@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name" translatable="false">My Application</string>
-    <string name="messege">.</string>
+    <string name="publish">publish</string>
+    <string name="subscribe">subscribe</string>
+    <string name="publish2">publish2</string>
+    <string name="subscribe2">subscribe2</string>
+
+
 </resources>

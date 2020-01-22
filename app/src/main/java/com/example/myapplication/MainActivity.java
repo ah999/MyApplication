@@ -15,61 +15,137 @@ import com.rabbitmq.client.*;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-
-
-import java.util.concurrent.TimeoutException;
-
 public class MainActivity extends AppCompatActivity {
     ConnectionFactory factory = new ConnectionFactory();
     private final static String QUEUE_NAME = "messenger";
     TextView txt;
-    Button btn;
+    Button publish, Publish2, subscribe, subscribe2;
     EditText edttext;
     TextView textView;
      String etext;
+    String message;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        publish = (Button) findViewById(R.id.publish);
+        Publish2 = (Button) findViewById(R.id.publish2);
+        subscribe = (Button) findViewById(R.id.subscribe);
+        subscribe2 = (Button) findViewById(R.id.subscribe2);
+        edttext = (EditText) findViewById(R.id.editText);
+        txt = (TextView) findViewById(R.id.textViewResult);
+
+        publish.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+               // Log.i(TAG, "sendNumber_Button was clicked");
+                try {
+                    edttext = (EditText) findViewById(R.id.editText);
+                    etext = (String) edttext.getText().toString();
+
+                    new Publisher().execute(etext);
+
+
+                    Context context = getApplicationContext();
+                    CharSequence text = "published to Blue";
+
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, etext, duration);
+                    toast.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        subscribe.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+               // Log.i(TAG, "sendNumber_Button was clicked");
+                try {
+                    Context context = getApplicationContext();
+                    final CharSequence text = "subscribed Blue";
+                    txt = (TextView) findViewById(R.id.textViewResult);
+
+                    new Subscriber().execute();
+                    //new Subscriber().onPostExecute(etext);
+                    String m;
+                    m = message;
+                    txt.setText(m);
+
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        Publish2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                // Log.i(TAG, "sendNumber_Button was clicked");
+                try {
+                    edttext = (EditText) findViewById(R.id.editText);
+                    etext = (String) edttext.getText().toString();
+
+                    new Publisher().execute(etext);
+
+
+                    Context context = getApplicationContext();
+                    CharSequence text = "published to Red";
+
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, etext, duration);
+                    toast.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+        subscribe2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                // Log.i(TAG, "sendNumber_Button was clicked");
+                try {
+                    Context context = getApplicationContext();
+                    final CharSequence text = "subscribed Red";
+                    txt = (TextView) findViewById(R.id.textViewResult);
+
+                    new Subscriber().execute();
+                    //new Subscriber().onPostExecute(etext);
+                    String m;
+                    m = message;
+                    txt.setText(etext);
+
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
     }
 
-    public void Publish(View view) throws java.io.IOException, TimeoutException {
-        edttext = (EditText) findViewById(R.id.editText3);
-        etext = (String) edttext.getText().toString();
-
-        new Publisher().execute(etext);
 
 
-        Context context = getApplicationContext();
-        CharSequence text = "published ";
-
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, etext, duration);
-        toast.show();
-
-
-    }
-
-    public void subscribe(View view) throws java.io.IOException, java.lang.InterruptedException, TimeoutException {
-        Context context = getApplicationContext();
-        final CharSequence text = "subscribed ";
-        txt = (TextView) findViewById(R.id.textView);
-
-        new Subscriber().execute();
-        new Subscriber().onPostExecute(etext);
-
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-    }
 
     public class Publisher extends AsyncTask<String, Void, String> {
 
 
         private Exception exception;
         private final static String QUEUE_NAME = "messenger";
+        private static final String EXCHANGE_NAME = "logs";
 
 
         @Override
@@ -78,18 +154,22 @@ public class MainActivity extends AppCompatActivity {
                 factory.setHost("192.168.2.104");
                 factory.setPort(5672);
                 factory.setVirtualHost("/");
-
                 factory.setUsername("ahmed");
                 factory.setPassword("123");
 
                 Connection connection = factory.newConnection();
                 Channel channel = connection.createChannel();
-                channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-                channel.basicPublish("", QUEUE_NAME, null, strings[0].getBytes());
+                channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+                String queueName = channel.queueDeclare().getQueue();
+                channel.queueBind(queueName, EXCHANGE_NAME, "");
+
+
+                //channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+                channel.basicPublish(EXCHANGE_NAME, "", null, strings[0].getBytes("UTF-8"));
                 channel.close();
                 connection.close();
             } catch (TimeoutException | java.io.IOException e) {
-                return null;
+
             }
 
             return strings[0];
@@ -101,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public class Subscriber extends AsyncTask< String, Void, String> {
         private Exception exception;
-        String message;
+        private static final String EXCHANGE_NAME = "logs";
 
 
         @Override
@@ -113,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
                 factory.setPort(5672);
                 Connection connection = factory.newConnection();
                 Channel channel = connection.createChannel();
+                channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+                String queueName = channel.queueDeclare().getQueue();
+                channel.queueBind(queueName, EXCHANGE_NAME, "");
+
                 channel.queueDeclare(QUEUE_NAME, false, false, false, null);
                 System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
                 Consumer consumer = new DefaultConsumer(channel) {
