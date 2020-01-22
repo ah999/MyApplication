@@ -67,14 +67,14 @@ public class MainActivity extends AppCompatActivity {
                // Log.i(TAG, "sendNumber_Button was clicked");
                 try {
                     Context context = getApplicationContext();
-                    final CharSequence text = "subscribed Blue";
+                    final CharSequence text = "subscribe Humidity !!";
                     txt = (TextView) findViewById(R.id.textViewResult);
 
                     new Subscriber().execute();
                     //new Subscriber().onPostExecute(etext);
                     String m;
                     m = message;
-                    txt.setText(m);
+                    txt.setText(etext);
 
                     int duration = Toast.LENGTH_SHORT;
                     Toast toast = Toast.makeText(context, text, duration);
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                     Context context = getApplicationContext();
-                    CharSequence text = "published to Red";
+                    CharSequence text = "published";
 
                     int duration = Toast.LENGTH_SHORT;
                     Toast toast = Toast.makeText(context, etext, duration);
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 // Log.i(TAG, "sendNumber_Button was clicked");
                 try {
                     Context context = getApplicationContext();
-                    final CharSequence text = "subscribed Red";
+                    final CharSequence text = "subscribe Temprature !!";
                     txt = (TextView) findViewById(R.id.textViewResult);
 
                     new Subscriber().execute();
